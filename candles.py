@@ -25,7 +25,7 @@ class Candles:
         for i in range(1,len(self.df)):
             self.is_evening_doji_star(i)
             self.is_morning_doji_star(i)
-        self.df.drop(columns=self.df.columns[0], axis=1, inplace=True)
+        # self.df.drop(columns=self.df.columns[0], axis=1, inplace=True)
         self.df.to_csv(address)
         return self.df
 

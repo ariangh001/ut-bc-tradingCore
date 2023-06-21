@@ -32,7 +32,7 @@ def make_data():
         live_candles[i]['time'] = pd.to_datetime(live_candles[i]['mts'],unit = 'ms')
     column = ['time', 'open', 'close', 'high', 'low', 'volume']
     live_df = pd.DataFrame(live_candles, columns=column)
-    live_df['time'] = live_df['time'].apply(GMT2UTC)
+    # live_df['time'] = live_df['time'].apply(GMT2UTC)
     live_df = live_df.reindex(index=live_df.index[::-1])
 
 def new_candle(msg):
@@ -105,9 +105,14 @@ class Core:
             except Exception as error:
                 self.logger.error('######################')
                 self.logger.error(error)
+                print(error)
 
     def checkNewCandles(self,signal_flag):
         global live_df
+        self.candles = Candles(self.df)
+        self.df = self.candles.run()
+        c = Candles(live_df)
+        live_df = c.run()
         last_date = self.df.iloc[-1]['time']
         for ind in live_df.index:
             index = self.df[self.df['time'] == live_df.iloc[ind]['time']].index
@@ -125,8 +130,6 @@ class Core:
         sell_signal = False
         message = ''
         self.df.reset_index(drop=True,inplace=True)
-        self.candles = Candles(self.df)
-        self.df = self.candles.run()
         self.ichimoku = Ichimoku(self.df)
         self.signals = self.ichimoku.run(LIVE_SIGNAL_ADDRESS,self.symbol,self.timeframe,CLOUD_FILE_ADDRESS)
         if(self.signals.iloc[-2]['BUY'] == 1):
@@ -145,8 +148,8 @@ class Core:
         self.df = pd.read_csv(f'./data.csv')
         # self.df['time'] = self.df['time'].apply(GMT2UTC)
         self.df.reset_index(drop=True,inplace=True)
-        self.candles = Candles(self.df)
-        self.df = self.candles.run()
+        # self.candles = Candles(self.df)
+        # self.df = self.candles.run()
         signal = [0 for i in range(len(self.df))]
         ichimoku = Ichimoku(self.df)
         signals = ichimoku.run(LIVE_SIGNAL_ADDRESS,self.symbol,self.timeframe,CLOUD_FILE_ADDRESS)
