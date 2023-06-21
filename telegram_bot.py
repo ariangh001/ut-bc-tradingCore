@@ -5,8 +5,9 @@ import requests
 
 
 SIGNALS_ADDRESS = f'./live_data/live_signals.csv'
-TOKEN = ''
+TOKEN = '6125508932:AAFuLnnD8_mj5ZRfUdfoZerOVBP6eIXkT0E'
 CHAT_ID = {
+    '5m': '-1001957911080'
 }
 
 
