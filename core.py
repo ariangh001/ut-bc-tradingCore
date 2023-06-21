@@ -171,8 +171,8 @@ if __name__ == "__main__":
         my_client.start()
         my_client.kline(symbol=SYMBOL, id=1, interval=TIMEFRAME, callback=new_candle)
         core = Core()
-        # core.run()
-        core.backtest(start=round(time.time() * 1000) - 604800000,end=round(time.time() * 1000))
+        core.run()
+        # core.backtest(start=round(time.time() * 1000) - 604800000,end=round(time.time() * 1000))
     except KeyboardInterrupt:
         my_client.stop()
         sys.exit(0)
