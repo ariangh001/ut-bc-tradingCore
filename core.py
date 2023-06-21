@@ -2,6 +2,7 @@ from binance_data import Binance_Data
 from database import Database
 from telegram_bot import Telegram_Bot
 from ichimoku import Ichimoku
+from candles import Candles
 import sys
 import plotly.graph_objects as go
 import pandas as pd
@@ -14,7 +15,6 @@ import logging
 FULL_SYMBOL = 'ETHEREUM'
 SYMBOL = 'ETHUSDT'
 TIMEFRAME = '5m'
-
 
 LIVE_DF_ADDRESS = './live_data.csv'
 LIVE_SIGNAL_ADDRESS = './live_signals.csv'
@@ -95,7 +95,7 @@ class Core:
                         signal_code = self.database.readCodesData(TIMEFRAME,True)
                         self.database.modifyCodeNumber(TIMEFRAME,signal_code + 1,True)
                         self.plotFigure()
-                        self.telegram_bot.send_signals(message,SYMBOL,FULL_SYMBOL,signal_code,adx,self.df.iloc[-1]['close'])
+                        self.telegram_bot.send_signals(message,SYMBOL,FULL_SYMBOL,signal_code,adx,self.df.iloc[-1]['close'],self.df.iloc[-2]['evening_doji_star'],self.df.iloc[-2]['morning_doji_star'])
                         self.telegram_bot.send_photo(TIMEFRAME,'./fig1.jpeg')
                         signal_flag = True
 
@@ -125,6 +125,8 @@ class Core:
         sell_signal = False
         message = ''
         self.df.reset_index(drop=True,inplace=True)
+        self.candles = Candles(self.df)
+        self.df = self.candles.run()
         self.ichimoku = Ichimoku(self.df)
         self.signals = self.ichimoku.run(LIVE_SIGNAL_ADDRESS,self.symbol,self.timeframe,CLOUD_FILE_ADDRESS)
         if(self.signals.iloc[-2]['BUY'] == 1):
@@ -138,12 +140,13 @@ class Core:
         return (buy_signal and not(signal_flag)),(sell_signal and not(signal_flag)),message,(self.signals.iloc[-1]['ADX'])
 
     def backtest(self,start,end):
-        # if(not(os.path.isfile(f'../signals/{self.symbol}_{self.timeframe}.csv'))):
         a = Binance_Data(self.symbol,self.timeframe)
         a.run_historical(futures=False,start=start,end=end)
         self.df = pd.read_csv(f'./data.csv')
         # self.df['time'] = self.df['time'].apply(GMT2UTC)
         self.df.reset_index(drop=True,inplace=True)
+        self.candles = Candles(self.df)
+        self.df = self.candles.run()
         signal = [0 for i in range(len(self.df))]
         ichimoku = Ichimoku(self.df)
         signals = ichimoku.run(LIVE_SIGNAL_ADDRESS,self.symbol,self.timeframe,CLOUD_FILE_ADDRESS)

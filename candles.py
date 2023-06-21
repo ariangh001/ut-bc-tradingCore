@@ -1,10 +1,36 @@
 import numpy as np
 import pandas as pd
-from patterns import Hammer,HangingMan,Engulfing
+
+class Candles:
+    def __init__(self,df):
+        self.df = df
+
+    def is_evening_doji_star(self,i):
+        main_condition_1 = (self.df.iloc[i]['close'] == self.df.iloc[i]['open']) or (abs(round(self.df.iloc[i]['open'] - self.df.iloc[i]['close'], 2)) < (self.df.iloc[i]['high'] - self.df.iloc[i]['low']))
+        main_condition_2 = (self.df.iloc[i-1]['close'] > self.df.iloc[i-1]['open']) and (self.df.iloc[i-1]['close'] <= min(self.df.iloc[i]['close'] , self.df.iloc[i]['open']))
+        if (main_condition_1 and main_condition_2):
+            self.df.loc[i ,'evening_doji_star'] = True
+        else:
+            self.df.loc[i ,'evening_doji_star'] = False
+
+    def is_morning_doji_star(self,i):
+        main_condition_1 = (self.df.iloc[i]['close'] == self.df.iloc[i]['open']) or (abs(round(self.df.iloc[i]['open'] - self.df.iloc[i]['close'], 2)) < (self.df.iloc[i]['high'] - self.df.iloc[i]['low']))
+        main_condition_2 = (self.df.iloc[i-1]['close'] < self.df.iloc[i-1]['open']) and (self.df.iloc[i-1]['close'] >= self.df.iloc[i]['open'])
+        if (main_condition_1 and main_condition_2):
+            self.df.loc[i ,'morning_doji_star'] = True
+        else:
+            self.df.loc[i ,'morning_doji_star'] = False
+
+    def run(self,address='./doji.csv'):
+        for i in range(1,len(self.df)):
+            self.is_evening_doji_star(i)
+            self.is_morning_doji_star(i)
+        self.df.drop(columns=df.columns[0], axis=1, inplace=True)
+        self.df.to_csv(address)
+        return self.df
 
 
-df = pd.read_csv('./data.csv')
-df = df.rename(columns={"open": "Open", "close": "Close", "high":"High", "low":"Low", "volume":"Volume"})
-hammer = Engulfing(df)
-output_df = hammer.compute_pattern()
-output_df.to_csv('./hammer.csv')
+if __name__ == "__main__":
+    df = pd.read_csv('./data.csv')
+    jp_candles = Candles(df)
+    jp_candles.run()
