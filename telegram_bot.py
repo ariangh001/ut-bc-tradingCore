@@ -33,7 +33,7 @@ class Telegram_Bot:
         evening_doji_color = '🔴'
         if(signal == 'Buy'):
             signal_color = '🟢'
-        if(adx >= 22):
+        if(adx >= 25):
             adx_color = '🟢'
         if(morning_doji):
             morning_doji_color = '🟢'
