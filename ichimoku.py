@@ -181,7 +181,6 @@ class Ichimoku:
         # self.save_cloud_phase(symbol,timeframe,cloud_file_address)
         self.calculate_signals()
         self.detect_signals()
-        del self.df[self.df.columns[0]]
         self.df.to_csv(signals_address)
         return self.df
 
