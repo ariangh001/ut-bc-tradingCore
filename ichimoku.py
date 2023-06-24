@@ -98,7 +98,7 @@ class Ichimoku:
         self.df = pd.concat([self.df,buy_condition_1,sell_condition_1,buy_condition_2,sell_condition_2],axis=1)
 
     def detect_signals(self,use_adx=True):
-        ADX_VALUE = 25
+        ADX_VALUE = 30
         buy_signals = [0 for i in range(len(self.df))]
         sell_signals = [0 for i in range(len(self.df))]
         buy_crosses = self.df[self.df['Ichimoku_Buy_Crossover'] == True].index

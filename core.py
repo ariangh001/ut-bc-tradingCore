@@ -88,7 +88,6 @@ class Core:
         signal_flag = False
         while(True):
             try:
-                a = self.database.readCodesData(TIMEFRAME,True)
                 if(len(live_df) > 0):
                     signal_flag = self.checkNewCandles(signal_flag)
                     buy_signal,sell_signal,message,adx, = self.technicalAnalysis(signal_flag)
@@ -146,26 +145,15 @@ class Core:
         a = Binance_Data(self.symbol,self.timeframe)
         a.run_historical(futures=False,start=start,end=end)
         self.df = pd.read_csv(f'./data.csv')
+        self.candles = Candles(self.df)
+        self.df = self.candles.run()
         # self.df['time'] = self.df['time'].apply(GMT2UTC)
         self.df.reset_index(drop=True,inplace=True)
         # self.candles = Candles(self.df)
         # self.df = self.candles.run()
-        signal = [0 for i in range(len(self.df))]
         ichimoku = Ichimoku(self.df)
-        signals = ichimoku.run(LIVE_SIGNAL_ADDRESS,self.symbol,self.timeframe,CLOUD_FILE_ADDRESS)
-        for i in range(len(self.df)):
-            if(signals.iloc[i-1]['BUY'] == 1):
-                signal[i] = 'BUY'
-
-            elif(signals.iloc[i-1]['SELL'] == 1):
-                signal[i] = 'SELL'
-
-        self.df['BUY'] = signals['BUY']
-        self.df['SELL'] = signals['SELL']
-        self.df['Signal'] = signal
-        self.df['ADX'] = signals['ADX']
-        self.df.to_csv(f'./{self.symbol}_{self.timeframe}.csv')
-        return self.df
+        signals = ichimoku.run(f'./{self.symbol}_{self.timeframe}_new.csv',self.symbol,self.timeframe,CLOUD_FILE_ADDRESS)
+        return signals
 
 
 if __name__ == "__main__":
@@ -176,6 +164,7 @@ if __name__ == "__main__":
         core = Core()
         core.run()
         # core.backtest(start=round(time.time() * 1000) - 604800000,end=round(time.time() * 1000))
+        # core.backtest(start=1684873800000,end=1687610115197)
     except KeyboardInterrupt:
         my_client.stop()
         sys.exit(0)

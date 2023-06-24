@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 
 
-SIGNALS_ADDRESS = f'./live_data/live_signals.csv'
+SIGNALS_ADDRESS = f'./live_signals.csv'
 TOKEN = '6125508932:AAFuLnnD8_mj5ZRfUdfoZerOVBP6eIXkT0E'
 CHAT_ID = {
     '5m': '-1001957911080'
