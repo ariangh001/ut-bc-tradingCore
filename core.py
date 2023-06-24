@@ -89,29 +89,29 @@ class Core:
         while(True):
             try:
                 if(len(live_df) > 0):
-                    self.logger.debug('OOOO')
+                    self.logger.error('OOOO')
                     signal_flag = self.checkNewCandles(signal_flag)
-                    self.logger.debug('SSSS')
+                    self.logger.error('SSSS')
                     buy_signal,sell_signal,message,adx, = self.technicalAnalysis(signal_flag)
-                    self.logger.debug('XXXX')
+                    self.logger.error('XXXX')
                     if(buy_signal or sell_signal):
-                        self.logger.debug('hi1')
+                        self.logger.error('hi1')
                         signal_code = self.database.readCodesData(TIMEFRAME,True)
-                        self.logger.debug('hi2')
+                        self.logger.error('hi2')
                         self.database.modifyCodeNumber(TIMEFRAME,signal_code + 1,True)
-                        self.logger.debug('hi3')
+                        self.logger.error('hi3')
                         self.plotFigure()
-                        self.logger.debug('hi4')
+                        self.logger.error('hi4')
                         self.telegram_bot.send_signals(message,SYMBOL,FULL_SYMBOL,signal_code,adx,self.df.iloc[-1]['close'],self.df.iloc[-2]['evening_doji_star'],self.df.iloc[-2]['morning_doji_star'])
-                        self.logger.debug('hi5')
+                        self.logger.error('hi5')
                         self.telegram_bot.send_photo(TIMEFRAME,'./fig1.jpeg')
-                        self.logger.debug('hi6')
+                        self.logger.error('hi6')
                         signal_flag = True
 
                     time.sleep(3)
-                    self.logger.debug('YYYY')
+                    self.logger.error('YYYY')
                     print(self.signals[-2:])
-                    self.logger.debug('PPPP')
+                    self.logger.error('PPPP')
 
             except Exception as error:
                 self.logger.error('######################')
