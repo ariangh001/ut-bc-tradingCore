@@ -88,31 +88,20 @@ class Core:
         signal_flag = False
         while(True):
             try:
+                a = self.database.readCodesData(TIMEFRAME,True)
                 if(len(live_df) > 0):
-                    self.logger.error('OOOO')
                     signal_flag = self.checkNewCandles(signal_flag)
-                    self.logger.error('SSSS')
                     buy_signal,sell_signal,message,adx, = self.technicalAnalysis(signal_flag)
-                    self.logger.error('XXXX')
                     if(buy_signal or sell_signal):
-                        self.logger.error('hi1')
                         signal_code = self.database.readCodesData(TIMEFRAME,True)
-                        self.logger.error('hi2')
                         self.database.modifyCodeNumber(TIMEFRAME,signal_code + 1,True)
-                        self.logger.error('hi3')
                         self.plotFigure()
-                        self.logger.error('hi4')
                         self.telegram_bot.send_signals(message,SYMBOL,FULL_SYMBOL,signal_code,adx,self.df.iloc[-1]['close'],self.df.iloc[-2]['evening_doji_star'],self.df.iloc[-2]['morning_doji_star'])
-                        self.logger.error('hi5')
                         self.telegram_bot.send_photo(TIMEFRAME,'./fig1.jpeg')
-                        self.logger.error('hi6')
                         signal_flag = True
 
                     time.sleep(3)
-                    self.logger.error('YYYY')
                     print(self.signals[-2:])
-                    self.logger.error('PPPP')
-
             except Exception as error:
                 self.logger.error('######################')
                 self.logger.error(error)
