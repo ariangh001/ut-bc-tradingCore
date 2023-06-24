@@ -1,6 +1,7 @@
 from binance_data import Binance_Data
 from database import Database
 from telegram_bot import Telegram_Bot
+from boors_data import Boors
 from ichimoku import Ichimoku
 from candles import Candles
 import sys
@@ -58,12 +59,16 @@ def GMT2UTC(t):
         return str(utc.astimezone(to_zone))[:-6]
 
 class Core:
-    def __init__(self,symbol=SYMBOL,timeframe=TIMEFRAME):
+    def __init__(self,symbol=SYMBOL,timeframe=TIMEFRAME,boors=False):
         self.symbol = symbol
         self.timeframe = timeframe
         self.database = Database(DB_ADDRESS)
-        self.live_data = Binance_Data(self.symbol,self.timeframe)
-        self.df = self.live_data.get_historical_data(candles_num=1000,futures=False)
+        if(boors):
+            self.live_data = Boors(self.symbol)
+            self.df = self.live_data.get_data()
+        else:
+            self.live_data = Binance_Data(self.symbol,self.timeframe)
+            self.df = self.live_data.get_historical_data(candles_num=1000,futures=False)
         self.df = self.df.sort_values(by='time')
         # self.df['time'] = self.df['time'].apply(GMT2UTC)
         self.df = self.df.iloc[-200:]
@@ -141,10 +146,14 @@ class Core:
 
         return (buy_signal and not(signal_flag)),(sell_signal and not(signal_flag)),message,(self.signals.iloc[-1]['ADX'])
 
-    def backtest(self,start,end):
-        a = Binance_Data(self.symbol,self.timeframe)
-        a.run_historical(futures=False,start=start,end=end)
-        self.df = pd.read_csv(f'./data.csv')
+    def backtest(self,start,end,boors=False):
+        if(boors):
+            self.live_data = Boors(self.symbol)
+            self.df = self.live_data.get_data()
+        else:
+            a = Binance_Data(self.symbol,self.timeframe)
+            a.run_historical(futures=False,start=start,end=end)
+            self.df = pd.read_csv(f'./data.csv')
         self.candles = Candles(self.df)
         self.df = self.candles.run()
         # self.df['time'] = self.df['time'].apply(GMT2UTC)
@@ -152,7 +161,7 @@ class Core:
         # self.candles = Candles(self.df)
         # self.df = self.candles.run()
         ichimoku = Ichimoku(self.df)
-        signals = ichimoku.run(f'./{self.symbol}_{self.timeframe}_new.csv',self.symbol,self.timeframe,CLOUD_FILE_ADDRESS)
+        signals = ichimoku.run(f'./{self.symbol}_{self.timeframe}.csv',self.symbol,self.timeframe,CLOUD_FILE_ADDRESS)
         return signals
 
 
@@ -164,7 +173,8 @@ if __name__ == "__main__":
         core = Core()
         core.run()
         # core.backtest(start=round(time.time() * 1000) - 604800000,end=round(time.time() * 1000))
-        # core.backtest(start=1684873800000,end=1687610115197)
+        # core = Core(symbol='وبملت',boors=True)
+        # core.backtest(start=1684873800000,end=1687610115197,boors=True)
     except KeyboardInterrupt:
         my_client.stop()
         sys.exit(0)
